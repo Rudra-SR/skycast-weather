@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyCast | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: #0f172a;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bg-gradient {
+            background: linear-gradient(-45deg, #1e293b, #0f172a, #1e1b4b);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gradient text-white p-4">
+
+    <div class="text-center mb-6">
+        <h1 class="text-5xl font-black tracking-tighter">SKYCAST</h1>
+        <p class="text-[10px] uppercase tracking-[0.4em] opacity-40 mt-1">Intelligent Weather Engine</p>
+    </div>
+
+    <div class="w-full max-w-5xl h-[75vh] flex flex-col gap-4">
+
+        <form id="weatherForm" method="POST"
+            class="glass rounded-full flex items-center px-4 py-2 mx-auto w-full max-w-md shadow-2xl">
+            {% csrf_token %}
+            <button type="button" onclick="getLocation()"
+                class="p-2 text-blue-400 hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-width="2"
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                </svg>
+            </button>
+            <input type="text" name="city" placeholder="Search City..."
+                class="bg-transparent border-none w-full px-4 focus:ring-0 text-lg placeholder-white/20">
+            <button type="submit" class="bg-blue-600 p-3 rounded-full hover:bg-blue-500 shadow-lg transition-all"><svg
+                    class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg></button>
+            <input type="hidden" name="lat" id="lat"><input type="hidden" name="lon" id="lon">
+        </form>
+
+        {% if weather_data %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-full overflow-hidden">
+
+            <div class="glass rounded-[2.5rem] p-6 flex flex-col items-center justify-center text-center shadow-2xl">
+                <h2 class="text-2xl font-bold uppercase tracking-widest text-blue-300">{{ weather_data.city }}</h2>
+                <img src="https://openweathermap.org/img/wn/{{ weather_data.icon }}@4x.png"
+                    class="w-32 drop-shadow-2xl">
+                <div class="text-8xl font-black tracking-tighter">{{ weather_data.temperature|floatformat:0 }}°</div>
+                <p class="text-lg capitalize font-medium opacity-90">{{ weather_data.description }}</p>
+                <div class="flex gap-8 mt-4 text-xs font-bold opacity-50">
+                    <p>💧 {{ weather_data.humidity }}%</p>
+                    <p>💨 {{ weather_data.wind_speed }}kph</p>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 flex flex-col gap-4">
+
+                <div class="glass rounded-3xl p-6 border-l-8 border-blue-500 flex items-center gap-6 shadow-xl">
+                    <div class="bg-blue-500/20 p-4 rounded-full">
+                        <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="text-[10px] font-bold uppercase opacity-40 tracking-widest mb-1">SkyCast Insight</h4>
+                        <p class="text-xl font-medium italic text-blue-50">"{{ weather_data.advice }}"</p>
+                    </div>
+                </div>
+
+                <div class="glass rounded-3xl p-6 flex-grow shadow-xl">
+                    <h3 class="text-xs font-bold uppercase opacity-30 mb-8 tracking-widest">Extended 5-Day Forecast</h3>
+                    <div class="flex justify-between items-center px-4">
+                        {% for day in forecast_list %}
+                        <div class="text-center group flex-1">
+                            <p
+                                class="text-[10px] opacity-40 mb-2 font-bold group-hover:text-blue-400 transition-colors uppercase">
+                                Day {{ day.day }}</p>
+                            <img src="https://openweathermap.org/img/wn/{{ day.icon }}.png"
+                                class="w-12 mx-auto drop-shadow-lg">
+                            <p class="text-xl font-black">{{ day.temp|floatformat:0 }}°</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    document.getElementById('lat').value = pos.coords.latitude;
+                    document.getElementById('lon').value = pos.coords.longitude;
+                    document.getElementById('weatherForm').submit();
+                });
+            }
+        }
+    </script>
+</body>
+
+</html>
