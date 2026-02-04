@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=4nclq4w23ipnkg3q0p3c-^g79&g&l31z9d(odh)ee%j%y)(dj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['skycast-weather-qqcz.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['Skycast-weather-qqcz.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
