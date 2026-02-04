@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=4nclq4w23ipnkg3q0p3c-^g79&g&l31z9d(odh)ee%j%y)(dj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['skycast-weather-qqcz.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -115,4 +115,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
+import os
+
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
+
+# This is the missing setting causing the error [cite: 131]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Optional: Add support for serving static files in production [cite: 1316]
+# If you decide to use WhiteNoise later, this is where it looks
