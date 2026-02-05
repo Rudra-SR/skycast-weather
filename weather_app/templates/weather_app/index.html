@@ -144,14 +144,12 @@
 
     <script>
         function getLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((pos) => {
-                    document.getElementById('lat').value = pos.coords.latitude;
-                    document.getElementById('lon').value = pos.coords.longitude;
-                    document.getElementById('weatherForm').submit();
-                });
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+                } else {
+                    alert("Geolocation is not supported by this browser.");
+                }
             }
-        }
     </script>
 </body>
 
