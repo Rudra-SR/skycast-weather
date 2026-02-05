@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def get_recommendations(temp, desc):
-    """Custom algorithm to provide unique user insights based on data."""
+    """Algorithm for weather-based advice."""
     desc = desc.lower()
     if temp > 30: return "It's scorching! Stay hydrated."
     elif temp < 15: return "Chilly! Grab a warm jacket."
@@ -21,22 +21,20 @@ def index(request):
     forecast_url = 'http://api.openweathermap.org/data/2.5/forecast?q={}&units=metric&appid=' + api_key
     forecast_coord_url = 'http://api.openweathermap.org/data/2.5/forecast?lat={}&lon={}&units=metric&appid=' + api_key
     
-    weather_data = None
-    forecast_list = []
-    error_msg = None
-
-    # FEATURE: Default city to prevent empty screen on first load
-    search_city = "Mumbai" 
+    weather_data, forecast_list, error_msg = None, [], None
+    
+    # UPDATED: Set Bengaluru as the default starting city
+    search_city = "Bangalore" 
+    
     lat, lon = None, None
 
     if request.method == 'POST':
         city_input = request.POST.get('city', '').strip()
-        lat = request.POST.get('lat')
-        lon = request.POST.get('lon')
+        lat, lon = request.POST.get('lat'), request.POST.get('lon')
         if city_input:
             search_city = city_input
 
-    # Performance: Caching logic
+    # Caching check for optimization
     cache_key = f"weather_{search_city.lower()}" if not lat else f"weather_{lat}_{lon}"
     cached_result = cache.get(cache_key)
 
@@ -62,11 +60,18 @@ def index(request):
                 'advice': get_recommendations(temp, desc),
             }
             if fore_res.get('cod') == "200":
-                # Extracting specific day from timestamp for the UI
                 forecast_list = [{'temp': i['main']['temp'], 'icon': i['weather'][0]['icon'], 'day': i['dt_txt'][8:10]} for i in fore_res['list'][::8]]
             cache.set(cache_key, {'current': weather_data, 'forecast': forecast_list}, 900)
         else:
-            error_msg = "Location not found."
+            api_error_code = current_res.get('cod')
+            if api_error_code == "404" or api_error_code == 404:
+                error_msg = f"We couldn't find '{search_city}'. Please check the spelling or try searching for a larger nearby city."
+            elif api_error_code == "401" or api_error_code == 401:
+                error_msg = "System Error: The Weather API key is invalid. Please contact the administrator."
+            elif api_error_code == "429" or api_error_code == 429:
+                error_msg = "We're receiving too many requests right now. Please wait a moment and try again."
+            else:
+                error_msg = "An unexpected error occurred while fetching the weather. Please try again later."
 
     return render(request, 'weather_app/index.html', {
         'weather_data': weather_data, 

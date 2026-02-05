@@ -13,14 +13,30 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        /* Desktop: Fixed Height */
+        @media (min-width: 768px) {
+            body {
+                height: 100vh;
+                overflow: hidden;
+                justify-content: center;
+            }
+        }
+
+        /* Mobile: Scrollable */
+        @media (max-width: 767px) {
+            body {
+                min-height: 100vh;
+                overflow-y: auto;
+                justify-content: flex-start;
+                padding-bottom: 2rem;
+            }
+        }
+
         body {
             background: #0f172a;
-            height: 100vh;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
         }
 
         .bg-gradient {
@@ -47,12 +63,12 @@
 
 <body class="bg-gradient text-white p-4">
 
-    <div class="text-center mb-6">
+    <div class="text-center mb-6 mt-4">
         <h1 class="text-5xl font-black tracking-tighter">SKYCAST</h1>
         <p class="text-[10px] uppercase tracking-[0.4em] opacity-40 mt-1">Intelligent Weather Engine</p>
     </div>
 
-    <div class="w-full max-w-5xl h-[75vh] flex flex-col gap-4">
+    <div class="w-full max-w-5xl h-auto md:h-[75vh] flex flex-col gap-4">
 
         <form id="weatherForm" method="POST"
             class="glass rounded-full flex items-center px-4 py-2 mx-auto w-full max-w-md shadow-2xl">
@@ -73,8 +89,14 @@
             <input type="hidden" name="lat" id="lat"><input type="hidden" name="lon" id="lon">
         </form>
 
+        {% if error_msg %}
+        <div class="mx-auto w-full max-w-md p-3 bg-red-500/20 border border-red-500/50 rounded-2xl text-center">
+            <p class="text-sm font-bold text-red-200">⚠️ {{ error_msg }}</p>
+        </div>
+        {% endif %}
+
         {% if weather_data %}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-full overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-full md:overflow-hidden">
 
             <div class="glass rounded-[2.5rem] p-6 flex flex-col items-center justify-center text-center shadow-2xl">
                 <h2 class="text-2xl font-bold uppercase tracking-widest text-blue-300">{{ weather_data.city }}</h2>
@@ -104,12 +126,10 @@
 
                 <div class="glass rounded-3xl p-6 flex-grow shadow-xl">
                     <h3 class="text-xs font-bold uppercase opacity-30 mb-8 tracking-widest">Extended 5-Day Forecast</h3>
-                    <div class="flex justify-between items-center px-4">
+                    <div class="grid grid-cols-3 md:flex md:justify-between items-center px-4 gap-4">
                         {% for day in forecast_list %}
-                        <div class="text-center group flex-1">
-                            <p
-                                class="text-[10px] opacity-40 mb-2 font-bold group-hover:text-blue-400 transition-colors uppercase">
-                                Day {{ day.day }}</p>
+                        <div class="text-center group">
+                            <p class="text-[10px] opacity-40 mb-2 font-bold uppercase">Day {{ day.day }}</p>
                             <img src="https://openweathermap.org/img/wn/{{ day.icon }}.png"
                                 class="w-12 mx-auto drop-shadow-lg">
                             <p class="text-xl font-black">{{ day.temp|floatformat:0 }}°</p>

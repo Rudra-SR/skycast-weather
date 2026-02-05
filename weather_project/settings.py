@@ -124,5 +124,3 @@ STATIC_URL = 'static/'
 # This is the missing setting causing the error [cite: 131]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Optional: Add support for serving static files in production [cite: 1316]
-# If you decide to use WhiteNoise later, this is where it looks
